@@ -45,16 +45,19 @@
       #tweet-wrapper {
         margin-top: 100px;
       }
-      #what,#where {
-        width: 50%;
+      #what,#where,#actions {
+        width: 33.33%;
         float: left;
         text-align: center;
       }
-      #where:after {
-        clear: both;
+      #questions {
+        max-width: 900px;
+        margin: 0 auto 10px;
       }
-      #actions {
-        text-align: center;
+      #questions:after {
+        content: "";
+        display: table;
+        clear: both;
       }
       #find-it,#stop-it {
         -webkit-appearance: none;
@@ -62,7 +65,7 @@
         padding: 8px;
         margin: 8px;
         background: none;
-        font-size: 24px;
+        font-size: 32px;
         cursor: pointer;
       }
       #stop-it > img {
@@ -75,22 +78,24 @@
   </head>
   <body>
     <div style="text-align: center; margin-bottom: 20px"><img src="lost.gif" height="150"></div>
-    <div id="what">
-      <h2><label for="what-input">What have you lost?</label></h2>
-      <input id="what-input">
-    </div>
-    <div id="where">
-      <h2><label for="where-input">Around where?</label></h2>
-      <input id="where-input">
-      - or -
-      <button id="find-me" type="button">find me!</button>
-    </div>
-    <div id="actions">
-      <button id="find-it" type="button">find it!</button>
-      <button id="stop-it" type="button">
-        <img src="loading.gif">
-        <span>stop searching</span>
-      </button>
+    <div id="questions">
+      <div id="what">
+        <h2><label for="what-input">What have you lost?</label></h2>
+        <input id="what-input">
+      </div>
+      <div id="where">
+        <h2><label for="where-input">Around where?</label></h2>
+        <input id="where-input">
+        - or -
+        <button id="find-me" type="button">find me!</button>
+      </div>
+      <div id="actions">
+        <button id="find-it" type="button">find it!</button>
+        <button id="stop-it" type="button">
+          <img src="loading.gif">
+          <span>stop</span>
+        </button>
+      </div>
     </div>
     <div id="map"></div>
     <div id="overlay"></div>

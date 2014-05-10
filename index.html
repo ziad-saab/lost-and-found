@@ -2,6 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
     <title>Lost and found!</title>
     <style type="text/css">
       * {
@@ -9,15 +10,15 @@
       }
       html,body {
         height: 100%;
+        margin: 0;
+        padding: 0;
       }
       body {
         font-size: 100%;
         font-family: arial,helvetica,sans-serif;
       }
       #map {
-        max-width: 900px;
         height: 450px;
-        margin: 0 auto;
       }
       #stop-it {
         display: none;
@@ -41,23 +42,10 @@
         height: 100%;
         z-index: 10000;
         cursor: pointer;
+        overflow: auto;
       }
       #tweet-wrapper {
         margin-top: 100px;
-      }
-      #what,#where,#actions {
-        width: 33.33%;
-        float: left;
-        text-align: center;
-      }
-      #questions {
-        max-width: 900px;
-        margin: 0 auto 10px;
-      }
-      #questions:after {
-        content: "";
-        display: table;
-        clear: both;
       }
       #find-it,#stop-it {
         -webkit-appearance: none;
@@ -70,6 +58,30 @@
       }
       #stop-it > img {
         vertical-align: middle;
+      }
+
+      #what,#where,#actions {
+        text-align: center;
+      }
+
+      @media screen and (min-width: 750px) {
+        #map {
+          max-width: 750px;
+          margin: 0 auto;
+        }
+        #what,#where,#actions {
+          width: 33.33%;
+          float: left;
+        }
+        #questions {
+          max-width: 750px;
+          margin: 0 auto 10px;
+        }
+        #questions:after {
+          content: "";
+          display: table;
+          clear: both;
+        }
       }
     </style>
     <script>
@@ -120,7 +132,13 @@
             center: {lat: 0, lng: 0},
             minZoom: 2,
             zoom: 2,
-            scrollwheel: false
+            scrollwheel: false,
+            draggable: false,
+            panControl: false,
+            mapTypeControl: false,
+            scaleControl: false,
+            streetViewControl: false,
+            overviewMapControl: false
           }
         );
         

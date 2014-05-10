@@ -53,6 +53,21 @@
       #where:after {
         clear: both;
       }
+      #actions {
+        text-align: center;
+      }
+      #find-it,#stop-it {
+        -webkit-appearance: none;
+        border: 2px solid #000;
+        padding: 8px;
+        margin: 8px;
+        background: none;
+        font-size: 24px;
+        cursor: pointer;
+      }
+      #stop-it > img {
+        vertical-align: middle;
+      }
     </style>
     <script>
       var API = window.API = window.location.host == 'http://lostnfound.home.ziad.cc/' ? 'http://192.168.1.103:8000' : 'http://bdw14-lost-and-found.herokuapp.com';
@@ -70,9 +85,12 @@
       - or -
       <button id="find-me" type="button">find me!</button>
     </div>
-    <div>
+    <div id="actions">
       <button id="find-it" type="button">find it!</button>
-      <button id="stop-it" type="button">stop it!</button>
+      <button id="stop-it" type="button">
+        <img src="loading.gif">
+        <span>stop searching</span>
+      </button>
     </div>
     <div id="map"></div>
     <div id="overlay"></div>

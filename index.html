@@ -1,0 +1,217 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Lost and found!</title>
+    <style type="text/css">
+      #map {
+        height: 600px;
+      }
+      #stop-it {
+        display: none;
+      }
+      #overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background-color: rgba(0,0,0,0.5);
+      }
+      #tweet-box {
+        display: none;
+        position : fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 10000;
+        cursor: pointer;
+      }
+      #tweet-wrapper {
+        margin-top: 100px;
+      }
+      #hide {
+        text-align: center;
+      }
+    </style>
+    <script>
+      var API = window.API = window.location.host == 'http://lostnfound.home.ziad.cc/' ? 'http://192.168.1.103:8000' : 'http://bdw14-lost-and-found.herokuapp.com';
+    </script>
+  </head>
+  <body>
+    <h1>Lost and found!</h1>
+    <div id="what">
+      <h2><label for="what-input">What have you lost?</label></h2>
+      <input id="what-input">
+    </div>
+    <div id="where">
+      <h2><label for="where-input">Around where have you lost it?</label></h2>
+      <input id="where-input">
+      <button id="find-me" type="button">find me!</button>
+    </div>
+    <div>
+      <button id="find-it" type="button">find it!</button>
+      <button id="stop-it" type="button">stop it!</button>
+    </div>
+    <div id="map"></div>
+    <div id="overlay"></div>
+    <div id="tweet-box">
+      <div id="tweet-wrapper">
+        <div id="tweet-container">
+          
+        </div>
+      </div>
+    </div>
+    <script src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyAjoQM0o0N9lnYuc3dRYTChzV7i_21qdPk&sensor=false"></script>
+    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="geoPosition.js"></script>
+    <script>
+      (function() {
+        var founds = [];
+        var searching = false;
+        var minLat, minLng, maxLat, maxLng;
+        var map = new google.maps.Map(
+          $('#map')[0],
+          {
+            center: {lat: 0, lng: 0},
+            minZoom: 2,
+            zoom: 2,
+            scrollwheel: false
+          }
+        );
+        
+        var autocomplete = new google.maps.places.Autocomplete(
+          $('#where-input')[0],
+          {
+            types: ['(regions)']
+          }
+        );
+        
+        function onPlaceChanged() {
+          var place = autocomplete.getPlace();
+          if (place.geometry) {
+            map.panTo(place.geometry.location);
+            map.setZoom(11);
+          }
+        }
+        google.maps.event.addListener(autocomplete, 'place_changed', onPlaceChanged);
+        
+        $('#find-me').on('click', function() {
+          if (geoPosition.init()) {
+            geoPosition.getCurrentPosition(
+              function(pos) {
+                map.panTo({lat: pos.coords.latitude, lng: pos.coords.longitude});
+                map.setZoom(11);
+              },
+              function() {
+                alert('cant find you');
+              }
+            )
+          }
+          else {
+            alert('cant find you');
+          }
+        });
+        
+        function stopSearch() {
+          searching = false;
+          $('#find-it').show();
+          $('#stop-it').hide();
+        }
+        
+        function startSearch(lost) {
+          $('#find-it').hide();
+          $('#stop-it').show();
+          searching = true;
+          doSearch(lost);
+        }
+        
+        function doSearch(lost) {
+          if (!searching) {
+            return;
+          }
+          var box = map.getBounds();
+          var ne = box.getNorthEast();
+          var sw = box.getSouthWest();
+          minLat = sw.lat();
+          maxLat = ne.lat();
+          minLng = sw.lng();
+          maxLng = ne.lng();
+
+          $.getJSON(
+            API + '/search',
+            {
+              queryString: lost,
+              minLatitude: minLat,
+              maxLatitude: maxLat,
+              minLongitude: minLng,
+              maxLongitude: maxLng
+            }
+          ).then(function(response) {
+              if (!searching) {
+                return;
+              }
+              addFound(response);
+              setTimeout(doSearch.bind(null, lost), 5000);
+            });
+        }
+        
+        function addFound(tweets) {
+          var marker;
+          tweets.forEach(function(tweet) {
+            if (founds.indexOf(tweet.id) === -1) {
+              founds.push(tweet.id);
+              marker = new google.maps.Marker({
+                map: map,
+                draggable: false,
+                position: {lat: tweet.latitude, lng: tweet.longitude},
+                animation: google.maps.Animation.DROP
+              });
+              marker.tweetId = tweet.id;
+              google.maps.event.addListener(marker, 'click', clickMarker);
+            }
+          });
+        }
+        
+        function clickMarker() {
+          $.ajax({
+            url: 'https://api.twitter.com/1/statuses/oembed.json',
+            dataType: 'jsonp',
+            data: {
+              id: this.tweetId,
+              align: 'center'
+            }
+          }).then(function(response) {
+              showTweet(response.html);
+            });
+        }
+        
+        function showTweet(html) {
+          $('#overlay').show();
+          $('#tweet-box').show();
+          $('#tweet-container').html(html)
+        }
+        
+        $('#find-it').on('click', function() {
+          var lost = $('#what-input').val();
+          if (!lost) {
+            alert('enter something you lost');
+            return;
+          }
+          
+          startSearch(lost, minLat, maxLat, minLng, maxLng);
+        });
+        $('#stop-it').on('click', function() {
+          stopSearch();
+        });
+        $('#tweet-box').on('click', function() {
+          $('#overlay').hide();
+          $('#tweet-box').hide();
+        });
+      })();
+    </script>
+  </body>
+</html>
